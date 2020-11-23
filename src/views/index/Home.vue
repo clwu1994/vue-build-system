@@ -105,13 +105,17 @@ import RightPanel from './RightPanel'
 import { deepClone } from '@/utils/index'
 import drawingDefalut from '@/components/generator/drawingDefalut'
 import { inputComponents, selectComponents, layoutComponents, formConf } from '@/components/generator/config'
+import { getIdGlobal } from '@/utils/db'
 import DraggableItem from './DraggableItem'
+
+const idGlobal = getIdGlobal()
 
 let tempActiveData
 export default {
   data () {
     return {
       logo,
+      idGlobal,
       formConf,
       drawingList: drawingDefalut,
       activeId: drawingDefalut[0].formId,
@@ -145,7 +149,10 @@ export default {
       this.activeFormItem(clone)
     },
     drawingItemCopy() {},
-    activeFormItem() {},
+    activeFormItem(currentItem) {
+      this.activeData = currentItem
+      this.activeId = currentItem.__config__.formId
+    },
     cloneComponent(origin) {
       const clone = deepClone(origin)
       const config = clone.__config__
@@ -155,6 +162,22 @@ export default {
       tempActiveData = clone
       return tempActiveData
     },
+    createIdAndKey(item) {
+      const config = item.__config__
+      config.formId = ++this.idGlobal
+      config.renderKey = `${config.formId}${+new Date()}` // 改变renderKey后可以实现强制更新组件
+      if (config.layout === 'colFormItem') {
+        item.__vModel__ = `field${this.idGlobal}`
+      } else if (config.layout === 'rowFormItem') {
+        config.componentName = `row${this.idGlobal}`
+        !Array.isArray(config.children) && (config.children = [])
+        delete config.label // rowFormItem无需配置label属性
+      }
+      if (Array.isArray(config.children)) {
+        config.children = config.children.map(childItem => this.createIdAndKey(childItem))
+      }
+      return item
+    },
     onEnd() {},
     run() {},
     showJson() {},
@@ -163,7 +186,25 @@ export default {
     empty() {},
     drawingItemDelete() {},
     tagChange() {},
-    fetchData() {}
+    fetchData(component) {
+      const { dataType, method, url } = component.__config__
+      if (dataType === 'dynamic' && method && url) {
+        this.$axios({
+          method,
+          url
+        }).then(resp => {
+          this.setLoading(component, false)
+          this.setRespData(component, resp.data)
+        })
+      }
+    },
+    setLoading(component, val) {
+      const { directives } = component
+       if (Array.isArray(directives)) {
+        const t = directives.find(d => d.name === 'loading')
+        if (t) t.value = val
+      }
+    }
   }
 }
 </script>

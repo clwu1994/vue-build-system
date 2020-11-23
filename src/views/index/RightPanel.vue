@@ -648,7 +648,7 @@
 <script>
 import { isNumberStr, isArray } from '@/utils/index'
 import {
-  inputComponents, selectComponents, layoutComponents
+  inputComponents, selectComponents
 } from '@/components/generator/config'
 
 export default {
@@ -691,6 +691,7 @@ export default {
     }
   },
   methods: {
+    addSelectItem() {},
     addReg() {
       this.activeData.__config__.regList.push({
         pattern: '',

@@ -102,9 +102,12 @@
 import logo from '@/assets/logo.jpg'
 import draggable from 'vuedraggable'
 import RightPanel from './RightPanel'
+import { deepClone } from '@/utils/index'
 import drawingDefalut from '@/components/generator/drawingDefalut'
 import { inputComponents, selectComponents, layoutComponents, formConf } from '@/components/generator/config'
 import DraggableItem from './DraggableItem'
+
+let tempActiveData
 export default {
   data () {
     return {
@@ -135,9 +138,23 @@ export default {
     DraggableItem
   },
   methods: {
+    addComponent(item) {
+      const clone = this.cloneComponent(item)
+      this.fetchData(clone)
+      this.drawingList.push(clone)
+      this.activeFormItem(clone)
+    },
     drawingItemCopy() {},
     activeFormItem() {},
-    cloneComponent() {},
+    cloneComponent(origin) {
+      const clone = deepClone(origin)
+      const config = clone.__config__
+      config.span = this.formConf.span // 生成代码时，会根据span做精简判断
+      this.createIdAndKey(clone)
+      clone.placeholder !== undefined && (clone.placeholder += config.label)
+      tempActiveData = clone
+      return tempActiveData
+    },
     onEnd() {},
     run() {},
     showJson() {},

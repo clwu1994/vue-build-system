@@ -41,17 +41,78 @@
         </div>
       </el-scrollbar>
     </div>
+    <div class="center-board">
+      <div class="action-bar">
+        <el-button icon="el-icon-video-play" type="text" @click="run">
+          运行
+        </el-button>
+        <el-button icon="el-icon-view" type="text" @click="showJson">
+          查看json
+        </el-button>
+        <el-button icon="el-icon-download" type="text" @click="download">
+          导出vue文件
+        </el-button>
+        <el-button class="copy-btn-main" icon="el-icon-document-copy" type="text" @click="copy">
+          复制代码
+        </el-button>
+        <el-button class="delete-btn" icon="el-icon-delete" type="text" @click="empty">
+          清空
+        </el-button>
+      </div>
+      <el-scrollbar class="center-scrollbar">
+        <el-row class="center-board-row" :gutter="formConf.gutter">
+          <el-form
+            :size="formConf.size"
+            :label-position="formConf.labelPosition"
+            :disabled="formConf.disabled"
+            :label-width="formConf.labelWidth + 'px'"
+          >
+            <draggable class="drawing-board" :list="drawingList" :animation="340" group="componentsGroup">
+              <draggable-item
+                v-for="(item, index) in drawingList"
+                :key="item.renderKey"
+                :drawing-list="drawingList"
+                :current-item="item"
+                :index="index"
+                :active-id="activeId"
+                :form-conf="formConf"
+                @activeItem="activeFormItem"
+                @copyItem="drawingItemCopy"
+                @deleteItem="drawingItemDelete"
+              />
+            </draggable>
+            <div v-show="!drawingList.length" class="empty-info">
+              从左侧拖入或点选组件进行表单设计
+            </div>
+          </el-form>
+        </el-row>
+      </el-scrollbar>
+    </div>
+    <right-panel
+      :active-data="activeData"
+      :form-conf="formConf"
+      :show-field="!!drawingList.length"
+      @tag-change="tagChange"
+      @fetch-data="fetchData"
+    />
   </div>
 </template>
 
 <script>
 import logo from '@/assets/logo.jpg'
 import draggable from 'vuedraggable'
-import { inputComponents, selectComponents, layoutComponents } from '@/components/generator/config'
+import RightPanel from './RightPanel'
+import drawingDefalut from '@/components/generator/drawingDefalut'
+import { inputComponents, selectComponents, layoutComponents, formConf } from '@/components/generator/config'
+import DraggableItem from './DraggableItem'
 export default {
   data () {
     return {
       logo,
+      formConf,
+      drawingList: drawingDefalut,
+      activeId: drawingDefalut[0].formId,
+      activeData: drawingDefalut[0],
       leftComponents: [
         {
           title: '输入型组件',
@@ -69,11 +130,23 @@ export default {
     }
   },
   components: {
-    draggable
+    draggable,
+    RightPanel,
+    DraggableItem
   },
   methods: {
+    drawingItemCopy() {},
+    activeFormItem() {},
     cloneComponent() {},
-    onEnd() {}
+    onEnd() {},
+    run() {},
+    showJson() {},
+    download() {},
+    copy() {},
+    empty() {},
+    drawingItemDelete() {},
+    tagChange() {},
+    fetchData() {}
   }
 }
 </script>

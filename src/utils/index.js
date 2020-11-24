@@ -41,8 +41,8 @@ export function deepClone(obj) {
   const result = Array.isArray(obj) ? [] : obj.constructor ? new obj.constructor() : {}
 
   for (const key in obj) {
-    result[key] = deepClone(obj[key]);
+    result[key] = deepClone(obj[key])
   }
 
-  return result;
+  return result
 }

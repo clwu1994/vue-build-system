@@ -104,7 +104,9 @@ import draggable from 'vuedraggable'
 import RightPanel from './RightPanel'
 import { deepClone } from '@/utils/index'
 import drawingDefalut from '@/components/generator/drawingDefalut'
-import { inputComponents, selectComponents, layoutComponents, formConf } from '@/components/generator/config'
+import {
+  inputComponents, selectComponents, layoutComponents, formConf
+} from '@/components/generator/config'
 import { getIdGlobal } from '@/utils/db'
 import DraggableItem from './DraggableItem'
 
@@ -112,7 +114,12 @@ const idGlobal = getIdGlobal()
 
 let tempActiveData
 export default {
-  data () {
+  components: {
+    draggable,
+    RightPanel,
+    DraggableItem
+  },
+  data() {
     return {
       logo,
       idGlobal,
@@ -135,11 +142,6 @@ export default {
         }
       ]
     }
-  },
-  components: {
-    draggable,
-    RightPanel,
-    DraggableItem
   },
   methods: {
     addComponent(item) {
@@ -178,14 +180,46 @@ export default {
       }
       return item
     },
-    onEnd() {},
+    onEnd(obj) {
+      if (obj.to !== obj.from) {
+        this.fetchData(tempActiveData)
+        this.activeData = tempActiveData
+        this.activeId = this.idGlobal
+      }
+    },
     run() {},
     showJson() {},
     download() {},
     copy() {},
-    empty() {},
+    empty() {
+      this.$confirm('确定要清空所有组件吗？', '提示', { type: 'warning' }).then(
+        () => {
+          this.drawingList = []
+          this.idGlobal = 100
+        }
+      )
+    },
     drawingItemDelete() {},
     tagChange() {},
+    setRespData(component, respData) {
+      const { dataPath, renderKey, dataConsumer } = component.__config__
+      if (!dataPath || !dataConsumer) return
+      const data = dataPath.split('.').reduce((pre, item) => pre[item], respData)
+      this.setObjectValueByStringKeys(component, dataConsumer, data)
+      const i = this.drawingList.findIndex(item => item.__config__.renderKey === renderKey)
+      if (i > -1) this.$set(this.drawingList, i, component)
+    },
+    setObjectValueByStringKeys(obj, strKeys, val) {
+      const arr = strKeys.split('.')
+      arr.reduce((pre, item, i) => {
+        if (arr.length === i + 1) {
+          pre[item] = val
+        } else if (Object.prototype.toString.call(pre[item]) !== '[Object Object]') {
+          pre[item] = {}
+        }
+        return pre[item]
+      }, obj)
+    },
     fetchData(component) {
       const { dataType, method, url } = component.__config__
       if (dataType === 'dynamic' && method && url) {
@@ -200,7 +234,7 @@ export default {
     },
     setLoading(component, val) {
       const { directives } = component
-       if (Array.isArray(directives)) {
+      if (Array.isArray(directives)) {
         const t = directives.find(d => d.name === 'loading')
         if (t) t.value = val
       }

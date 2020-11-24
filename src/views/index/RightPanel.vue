@@ -652,12 +652,12 @@ import {
 } from '@/components/generator/config'
 
 export default {
+  props: ['showField', 'activeData', 'formConf'],
   data() {
     return {
       currentTab: 'field'
     }
   },
-  props: ['showField', 'activeData', 'formConf'],
   computed: {
     activeTag() {
       return this.activeData.__config__.tag
@@ -738,7 +738,6 @@ export default {
   }
 }
 </script>
-
 
 <style lang="scss" scoped>
 .right-board {

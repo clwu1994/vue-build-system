@@ -655,7 +655,29 @@ export default {
   props: ['showField', 'activeData', 'formConf'],
   data() {
     return {
-      currentTab: 'field'
+      currentTab: 'field',
+      colorFormatOptions: [
+        {
+          label: 'hex',
+          value: 'hex'
+        },
+        {
+          label: 'rgb',
+          value: 'rgb'
+        },
+        {
+          label: 'rgba',
+          value: 'rgba'
+        },
+        {
+          label: 'hsv',
+          value: 'hsv'
+        },
+        {
+          label: 'hsl',
+          value: 'hsl'
+        }
+      ]
     }
   },
   computed: {
@@ -691,7 +713,24 @@ export default {
     }
   },
   methods: {
-    addSelectItem() {},
+    addSelectItem() {
+      this.activeData.__slot__.options.push({
+        label: '',
+        value: ''
+      })
+    },
+    rangeChange(val) {
+      this.$set(
+        this.activeData.__config__,
+        'defaultValue',
+        val ? [this.activeData.min, this.activeData.max] : this.activeData.min
+      )
+    },
+    colorFormatChange(val) {
+      this.activeData.__config__.defaultValue = null
+      this.activeData['show-alpha'] = val.indexOf('a') > -1
+      this.activeData.__config__.renderKey = +new Date() // 更新renderKey,重新渲染该组件
+    },
     addReg() {
       this.activeData.__config__.regList.push({
         pattern: '',

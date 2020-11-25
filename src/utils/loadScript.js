@@ -51,7 +51,9 @@ function loadScript(src, callback) {
  * @param {*} list 一组远程脚本
  * @param {*} cb 回调
  */
-function loadScriptQueue(list, cb) {
+export function loadScriptQueue(list, cb) {
   const first = list.shift()
   list.length ? loadScript(first, () => loadScriptQueue(list, cb)) : loadScript(first, cb)
 }
+
+export default loadScript

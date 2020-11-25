@@ -95,6 +95,18 @@
       @tag-change="tagChange"
       @fetch-data="fetchData"
     />
+    <form-drawer
+      :visible.sync="drawerVisible"
+      :form-data="formData"
+      size="100%"
+      :generate-conf="generateConf"
+    />
+    <code-type-dialog
+      :visible.sync="dialogVisible"
+      title="选择生成类型"
+      :show-file-name="showFileName"
+      @confirm="generate"
+    />
   </div>
 </template>
 
@@ -102,13 +114,15 @@
 import logo from '@/assets/logo.jpg'
 import draggable from 'vuedraggable'
 import RightPanel from './RightPanel'
-import { deepClone } from '@/utils/index'
+import FormDrawer from './FormDrawer'
+import { deepClone, titleCase } from '@/utils/index'
 import drawingDefalut from '@/components/generator/drawingDefalut'
 import {
   inputComponents, selectComponents, layoutComponents, formConf
 } from '@/components/generator/config'
 import { getIdGlobal } from '@/utils/db'
 import DraggableItem from './DraggableItem'
+import CodeTypeDialog from './CodeTypeDialog'
 
 const idGlobal = getIdGlobal()
 
@@ -117,13 +131,19 @@ export default {
   components: {
     draggable,
     RightPanel,
-    DraggableItem
+    DraggableItem,
+    CodeTypeDialog,
+    FormDrawer
   },
   data() {
     return {
       logo,
       idGlobal,
       formConf,
+      dialogVisible: false,
+      drawerVisible: false,
+      showFileName: false,
+      generateConf: null,
       drawingList: drawingDefalut,
       activeId: drawingDefalut[0].formId,
       activeData: drawingDefalut[0],
@@ -144,6 +164,21 @@ export default {
     }
   },
   methods: {
+    generate(data) {
+      const func = this[`exec${titleCase(this.operationType)}`]
+      this.generateConf = data
+      func && func(data)
+    },
+    execRun(data) {
+      this.AssembleFormData()
+      this.drawerVisible = true
+    },
+    AssembleFormData() {
+      this.formData = {
+        fields: deepClone(this.drawingList),
+        ...this.formConf
+      }
+    },
     addComponent(item) {
       const clone = this.cloneComponent(item)
       this.fetchData(clone)
@@ -187,7 +222,11 @@ export default {
         this.activeId = this.idGlobal
       }
     },
-    run() {},
+    run() {
+      this.dialogVisible = true
+      this.showFileName = false
+      this.operationType = 'run'
+    },
     showJson() {},
     download() {},
     copy() {},

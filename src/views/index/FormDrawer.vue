@@ -75,6 +75,7 @@
 import {
   makeUpHtml, vueTemplate, vueScript, cssStyle
 } from '@/components/generator/html'
+import { saveAs } from 'file-saver'
 import { parse } from '@babel/parser'
 import loadMonaco from '@/utils/loadMonaco'
 import { makeUpJs } from '@/components/generator/js'
@@ -99,10 +100,16 @@ export default {
   props: ['formData', 'generateConf'],
   data() {
     return {
+      activeTab: 'html',
       resourceVisible: false,
       isIframeLoaded: false,
       scripts: [],
       links: []
+    }
+  },
+  computed: {
+    resources() {
+      return this.scripts.concat(this.links)
     }
   },
   methods: {
@@ -114,6 +121,24 @@ export default {
         this.isIframeLoaded = true
         this.isRefreshCode && (this.isInitcode = true) && this.runCode()
       }
+    },
+    exportFile() {
+      this.$prompt('文件名:', '导出文件', {
+        inputValue: `${+new Date()}.vue`,
+        closeOnClickModal: false,
+        inputPlaceholder: '请输入文件名'
+      }).then(({ value }) => {
+        if (!value) value = `${+new Date()}.vue`
+        const codeStr = this.generateCode()
+        const blob = new Blob([codeStr], { type: 'text/plain;charset=utf-8' })
+        saveAs(blob, value)
+      })
+    },
+    generateCode() {
+      const html = vueTemplate(editorObj.html.getValue())
+      const script = vueScript(editorObj.js.getValue())
+      const css = cssStyle(editorObj.css.getValue())
+      return beautifier.html(html + script + css, beautifierConf.html)
     },
     runCode() {
       const jsCodeStr = editorObj.js.getValue()

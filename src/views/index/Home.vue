@@ -145,6 +145,7 @@ export default {
       showFileName: false,
       generateConf: null,
       drawingList: drawingDefalut,
+      formData: {},
       activeId: drawingDefalut[0].formId,
       activeData: drawingDefalut[0],
       leftComponents: [

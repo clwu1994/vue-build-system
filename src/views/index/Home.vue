@@ -199,7 +199,15 @@ export default {
         }
       )
     },
-    drawingItemDelete() {},
+    drawingItemDelete(index, list) {
+      list.splice(index, 1)
+      this.$nextTick(() => {
+        const len = this.drawingList.length
+        if (len) {
+          this.activeFormItem(this.drawingList[len - 1])
+        }
+      })
+    },
     tagChange() {},
     setRespData(component, respData) {
       const { dataPath, renderKey, dataConsumer } = component.__config__

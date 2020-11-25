@@ -713,6 +713,9 @@ export default {
     }
   },
   methods: {
+    multipleChange(val) {
+      this.$set(this.activeData.__config__, 'defaultValue', val ? [] : '')
+    },
     addSelectItem() {
       this.activeData.__slot__.options.push({
         label: '',

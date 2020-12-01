@@ -143,35 +143,41 @@ export default {
     runCode() {
       const jsCodeStr = editorObj.js.getValue()
       const ast = parse(jsCodeStr, { sourceType: 'module' })
-      const astBody = ast.program.body
-      if (astBody.length > 1) {
-        this.$confirm(
-          'js格式不能识别，仅支持修改export default的对象内容',
-          '提示',
-          {
-            type: 'warning'
-          }
-        )
-      }
-      if (astBody[0].type === 'ExportDefaultDeclaration') {
-        const postData = {
-          type: 'refreshFrame',
-          data: {
-            generateConf: this.generateConf,
-            html: editorObj.html.getValue(),
-            js: jsCodeStr.replace(exportDefault, ''),
-            css: editorObj.css.getValue(),
-            scripts: this.scripts,
-            links: this.links
-          }
+      try {
+        console.log('ast', ast)
+        const astBody = ast.program.body
+        if (astBody.length > 1) {
+          this.$confirm(
+            'js格式不能识别，仅支持修改export default的对象内容',
+            '提示',
+            {
+              type: 'warning'
+            }
+          )
         }
+        if (astBody[0].type === 'ExportDefaultDeclaration') {
+          const postData = {
+            type: 'refreshFrame',
+            data: {
+              generateConf: this.generateConf,
+              html: editorObj.html.getValue(),
+              js: jsCodeStr.replace(exportDefault, ''),
+              css: editorObj.css.getValue(),
+              scripts: this.scripts,
+              links: this.links
+            }
+          }
 
-        this.$refs.previewPage.contentWindow.postMessage(
-          postData,
-          location.origin
-        )
-      } else {
-        this.$message.error('请使用export default')
+          this.$refs.previewPage.contentWindow.postMessage(
+            postData,
+            location.origin
+          )
+        } else {
+          this.$message.error('请使用export default')
+        }
+      } catch (err) {
+        this.$message.error(`js错误：${err}`)
+        console.error(err)
       }
     },
     onOpen() {
@@ -197,6 +203,18 @@ export default {
           }
         })
       })
+    },
+    setEditorValue(id, type, codeStr) {
+      if (editorObj[type]) {
+        editorObj[type].setValue(codeStr)
+      } else {
+        editorObj[type] = monaco.editor.create(document.getElementById(id), {
+          value: codeStr,
+          theme: 'vs-dark',
+          language: mode[type],
+          automaticLayout: true
+        })
+      }
     },
     onClose() {
       this.isInitcode = false

@@ -45,12 +45,14 @@ export function deepClone(obj) {
     return new RegExp(obj.source, flags.join(''))
   }
 
+  // eslint-disable-next-line no-nested-ternary
   const result = Array.isArray(obj) ? [] : obj.constructor ? new obj.constructor() : {}
 
+  /* eslint-disable */
   for (const key in obj) {
     result[key] = deepClone(obj[key])
   }
-
+  /* eslint-disable */
   return result
 }
 
